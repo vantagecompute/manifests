@@ -83,7 +83,7 @@ patches:
         {
           "enableGatewayApi": false,
           "kserveIngressGateway": "kserve/kserve-ingress-gateway",
-          "ingressGateway": "kubeflow/kubeflow-gateway",
+          "ingressGateway": "istio-system/vantage-gateway",
           "localGateway": "knative-serving/knative-local-gateway",
           "localGatewayService": "knative-local-gateway.istio-system.svc.cluster.local",
           "ingressDomain": "example.com",

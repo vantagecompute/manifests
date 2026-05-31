@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: llmisvc-webhook
+  namespace: kubeflow
+spec:
+  podSelector:
+    matchExpressions:
+      - key: control-plane
+        operator: In
+        values:
+          - llmisvc-controller-manager # LLMInferenceService validating webhook
+  # The kubernetes api server must reach the webhook (same pattern as kserve.yaml)
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 9443
+  policyTypes:
+    - Ingress

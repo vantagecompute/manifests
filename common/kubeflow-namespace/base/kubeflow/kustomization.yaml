@@ -13,6 +13,7 @@ resources:
 - katib-ui.yaml
 - kserve-models-web-app.yaml
 - kserve.yaml
+- llmisvc-webhook.yaml
 - metadata-envoy.yaml
 - metadata-grpc-server.yaml
 - ml-pipeline-ui.yaml

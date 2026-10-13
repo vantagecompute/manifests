@@ -55,10 +55,13 @@ permissions:
   contents: read
   actions: read
 
+# Set the repository variable USE_SELF_HOSTED_RUNNERS to "true" to run every
+# job below on the vantage-eng self-hosted runner group (X64). To widen or
+# narrow the runner set, set SELF_HOSTED_RUNS_ON to a runs-on value in JSON.
 jobs:
   kubeflow_pipelines_helm_installation:
     name: Install ${{ matrix.scenario }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     timeout-minutes: 45
     env:
       KF_PROFILE: kubeflow-user-example-com
@@ -72,6 +75,13 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    # GitHub-hosted images ship a pip-installable python3; on the self-hosted
+    # runners the system python3 is externally managed (PEP 668).
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
 
     - name: Install KinD, create the cluster, and install Kustomize
       run: |
@@ -159,3 +169,9 @@ jobs:
         kubectl get pods,services,deployments,statefulsets -A -o wide
         kubectl get customresourcedefinitions
         kubectl get events -A --sort-by=.lastTimestamp
+
+    # Self-hosted runners keep state between jobs: delete the KinD cluster so
+    # the next job can create its own.
+    - name: Delete KinD cluster
+      if: always()
+      run: kind delete cluster --name kubeflow || true

@@ -16,10 +16,13 @@ permissions:
   contents: read
   actions: read
 
+# Set the repository variable USE_SELF_HOSTED_RUNNERS to "true" to run every
+# job below on the vantage-eng self-hosted runner group (X64). To widen or
+# narrow the runner set, set SELF_HOSTED_RUNS_ON to a runs-on value in JSON.
 jobs:
   osv-scanner:
     if: ${{ github.repository == 'kubeflow/community-distribution' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     steps:
     - name: Checkout code
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

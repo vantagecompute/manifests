@@ -25,9 +25,12 @@ permissions:
   contents: read
   actions: read
 
+# Set the repository variable USE_SELF_HOSTED_RUNNERS to "true" to run every
+# job below on the vantage-eng self-hosted runner group (X64). To widen or
+# narrow the runner set, set SELF_HOSTED_RUNS_ON to a runs-on value in JSON.
 jobs:
   discover-components:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     name: Discover comparison components
     outputs:
       components: ${{ steps.discover.outputs.components }}
@@ -57,7 +60,7 @@ jobs:
 
   compare:
     needs: discover-components
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     name: Compare ${{ matrix.component }}
     strategy:
       # Every component reports its own verdict; one failure must not hide the
@@ -86,7 +89,7 @@ jobs:
       run: python3 tests/run_helm_kustomize_comparison.py "${{ matrix.component }}" --all-scenarios
 
   chart-behavior-tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     name: Test chart behavior
     steps:
     - name: Checkout code

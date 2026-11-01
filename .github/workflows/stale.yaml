@@ -9,10 +9,13 @@ on:
   schedule:
   - cron: '0 0 * * *' # Run every day at midnight
 
+# Set the repository variable USE_SELF_HOSTED_RUNNERS to "true" to run every
+# job below on the vantage-eng self-hosted runner group (X64). To widen or
+# narrow the runner set, set SELF_HOSTED_RUNS_ON to a runs-on value in JSON.
 jobs:
   stale:
     if: ${{ github.repository == 'kubeflow/community-distribution' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     permissions:
       issues: write
       pull-requests: write

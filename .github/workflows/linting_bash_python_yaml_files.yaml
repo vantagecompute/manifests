@@ -6,11 +6,21 @@ permissions:
   contents: read
   actions: read
 
+# Set the repository variable USE_SELF_HOSTED_RUNNERS to "true" to run every
+# job below on the vantage-eng self-hosted runner group (X64). To widen or
+# narrow the runner set, set SELF_HOSTED_RUNS_ON to a runs-on value in JSON.
 jobs:
   format_python_files:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+    # GitHub-hosted images ship a pip-installable python3; on the self-hosted
+    # runners the system python3 is externally managed (PEP 668).
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
 
     - name: Python Files Formatting Guidelines
       run: |
@@ -26,7 +36,7 @@ jobs:
             'black {source_file_or_directory}'
             to format python files.
         "
-    - uses: psf/black@87928e6d6761a4a6d22250e1fee5601b3998086e # 26.5.1
+    - uses: psf/black@258e7dbf348bc23cb70b8cdf693481c04634ebcc # 26.10.1
       with:
         src: |
           ./common
@@ -34,11 +44,18 @@ jobs:
           ./tests
 
   format_YAML_files:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         fetch-depth: 0
+
+    # GitHub-hosted images ship a pip-installable python3; on the self-hosted
+    # runners the system python3 is externally managed (PEP 668).
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: '3.12'
 
     - name: Install yamllint
       run: python3 -m pip install --upgrade pip && python3 -m pip install yamllint==1.38.0
@@ -90,7 +107,7 @@ jobs:
       shell: bash
 
   format_bash_files:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_SELF_HOSTED_RUNNERS == 'true' && fromJSON(vars.SELF_HOSTED_RUNS_ON || '{"group":"vantage-eng","labels":["X64"]}') || 'ubuntu-26.04' }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
